@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #0b0f14;
+  --foreground: #f8fafc;
+
+  --card: rgba(255, 255, 255, 0.04);
+  --card-foreground: #f8fafc;
+
+  --border: rgba(255, 255, 255, 0.08);
+
+  --accent-orange: #ff8c42;
+  --accent-lime: #d4ff3f;
+  --accent-purple: #a855f7;
+  --accent-green: #22c55e;
+}
+
+@theme {
+  --font-sans: "Tektur", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-lime: var(--accent-lime);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-green: var(--accent-green);
+
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)];
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/4 border border-white/8;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-2xl;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 15px rgba(255, 140, 66, 0.15);
+  }
+
+  .glow-lime {
+    box-shadow: 0 0 15px rgba(212, 255, 63, 0.15);
+  }
+
+  .accent-border-orange {
+    @apply border border-accent-orange/40 transition-colors duration-150 hover:border-accent-orange/80;
+  }
+
+  .accent-border-purple {
+    @apply border border-accent-purple/40 transition-colors duration-150 hover:border-accent-purple/80;
+  }
+
+  .accent-border-green {
+    @apply border border-accent-green/40 transition-colors duration-150 hover:border-accent-green/80;
+  }
+
+  .accent-border-l-orange {
+    @apply border-l-1 border-l-accent-orange/50 transition-colors duration-150;
+  }
+}
