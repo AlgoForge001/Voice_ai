@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: tts_user
+      POSTGRES_PASSWORD: tts_password
+      POSTGRES_DB: tts_saas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  # Redis (Queue & Cache)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  
+  # FastAPI Application
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://tts_user:tts_password@db:5432/tts_saas
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-secret-key-change-in-production
+      USE_GPU: "false"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./storage:/app/storage
+      - ./models:/app/models
+  
+  # Celery Worker
+  worker:
+    build: .
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=1
+    environment:
+      DATABASE_URL: postgresql://tts_user:tts_password@db:5432/tts_saas
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-secret-key-change-in-production
+      USE_GPU: "false"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./storage:/app/storage
+      - ./models:/app/models
+
+volumes:
+  postgres_data:

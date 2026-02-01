@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Token Test</title>
+</head>
+<body>
+    <h1>Authentication Token Test</h1>
+    
+    <div>
+        <h2>1. Check Token in LocalStorage</h2>
+        <button onclick="checkToken()">Check Token</button>
+        <pre id="tokenResult"></pre>
+    </div>
+    
+    <div>
+        <h2>2. Test Login</h2>
+        <input type="email" id="email" placeholder="Email" value="test@example.com">
+        <input type="password" id="password" placeholder="Password" value="password123">
+        <button onclick="testLogin()">Login</button>
+        <pre id="loginResult"></pre>
+    </div>
+    
+    <div>
+        <h2>3. Test TTS Generate</h2>
+        <button onclick="testGenerate()">Test Generate</button>
+        <pre id="generateResult"></pre>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        
+        function checkToken() {
+            const token = localStorage.getItem('auth_token');
+            const result = document.getElementById('tokenResult');
+            if (token) {
+                result.textContent = `Token found: ${token.substring(0, 50)}...`;
+            } else {
+                result.textContent = 'No token found in localStorage';
+            }
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('loginResult');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.token) {
+                    localStorage.setItem('auth_token', data.token);
+                    result.textContent += '\n\nToken saved to localStorage!';
+                }
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testGenerate() {
+            const token = localStorage.getItem('auth_token');
+            const result = document.getElementById('generateResult');
+            
+            if (!token) {
+                result.textContent = 'No token found! Please login first.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/tts/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        text: 'Hello world',
+                        voice_id: '1',
+                        language: 'en'
+                    })
+                });
+                
+                const data = await response.json();
+                result.textContent = `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

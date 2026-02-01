@@ -1,0 +1,26 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+psycopg2-binary==2.9.10
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+celery==5.4.0
+redis==5.2.0
+# TTS library - using coqui-tts fork for Python 3.12 support
+coqui-tts>=0.24.0
+torch>=2.1.0
+torchaudio>=2.1.0
+soundfile==0.12.1
+pydub==0.25.1
+boto3==1.35.80
+razorpay==1.4.2
+stripe==11.2.0
+python-dotenv==1.0.1
+httpx==0.28.1
+# IndicParler-TTS for Indian languages
+git+https://github.com/huggingface/parler-tts.git
+accelerate>=0.24.0
