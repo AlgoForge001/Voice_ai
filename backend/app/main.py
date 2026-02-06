@@ -47,6 +47,18 @@ async def startup_event():
     print("--- STARTUP: Database tables created ---")
     print(f"--- STARTUP: Environment: {settings.ENVIRONMENT} ---")
     print(f"--- STARTUP: GPU enabled: {settings.USE_GPU} ---")
+    
+    # Preload IndicParler model for faster first request
+    print("--- STARTUP: Preloading IndicParler model ---")
+    try:
+        from app.adapters.tts.indicparler import get_indicparler_adapter
+        adapter = get_indicparler_adapter()
+        adapter._load_model()
+        print("--- STARTUP: IndicParler model ready ---")
+    except Exception as e:
+        print(f"--- STARTUP: Failed to preload IndicParler model: {e} ---")
+        print("--- STARTUP: Model will lazy-load on first request ---")
+    
     print("--- STARTUP: Application ready ---")
 
 

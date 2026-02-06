@@ -101,9 +101,23 @@ class IndicParlerTTSAdapter(BaseTTS):
             from parler_tts import ParlerTTSForConditionalGeneration
             print("DEBUG: Loading model from pretrained...")
             self.model = ParlerTTSForConditionalGeneration.from_pretrained(
-                model_path
+                model_path,
+                attn_implementation="eager"  # Use eager attention (sdpa not supported)
             ).to(self.device)
             print("DEBUG: Model loaded to device.")
+            
+            # Enable eval mode for inference optimizations
+            self.model.eval()
+            
+            # Try to compile model for faster CPU inference (PyTorch 2.0+)
+            try:
+                import torch._dynamo
+                if hasattr(torch, 'compile') and self.device == "cpu":
+                    print("[IndicParler] Compiling model for CPU optimization...")
+                    self.model = torch.compile(self.model, mode="reduce-overhead")
+                    print("[IndicParler] Model compilation successful!")
+            except Exception as compile_err:
+                print(f"[IndicParler] Model compilation skipped: {compile_err}")
             
             # Load tokenizers
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -302,7 +316,7 @@ class IndicParlerTTSAdapter(BaseTTS):
             merged_chunks = []
             current = ""
             for s in chunks:
-                if len(current) + len(s) < 180: # Optimized chunk size for IndicParler
+                if len(current) + len(s) < 300: # Optimized chunk size (increased from 180)
                     current += " " + s
                 else:
                     if current: merged_chunks.append(current.strip())
@@ -335,8 +349,8 @@ class IndicParlerTTSAdapter(BaseTTS):
                     return_tensors="pt"
                 ).to(self.device)
                 
-                # Generate audio
-                with torch.no_grad():
+                # Generate audio with optimized inference mode
+                with torch.inference_mode():
                     generation = self.model.generate(
                         input_ids=description_input_ids.input_ids,
                         attention_mask=description_input_ids.attention_mask,
