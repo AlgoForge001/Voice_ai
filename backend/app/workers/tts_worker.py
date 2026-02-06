@@ -76,8 +76,8 @@ if CELERY_AVAILABLE:
             print(f"[ASYNC WORKER] Starting job {job_id} for language: {job.language}")
             TTSService.update_job_status(db, UUID(job_id), "processing")
             
-            # Get TTS adapter
-            tts_adapter = get_tts_adapter()
+            # Get TTS adapter with language to use preloaded instance
+            tts_adapter = get_tts_adapter(language=job.language)
             
             # Generate audio
             import asyncio

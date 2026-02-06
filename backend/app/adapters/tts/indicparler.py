@@ -109,15 +109,20 @@ class IndicParlerTTSAdapter(BaseTTS):
             # Enable eval mode for inference optimizations
             self.model.eval()
             
-            # Try to compile model for faster CPU inference (PyTorch 2.0+)
-            try:
-                import torch._dynamo
-                if hasattr(torch, 'compile') and self.device == "cpu":
-                    print("[IndicParler] Compiling model for CPU optimization...")
-                    self.model = torch.compile(self.model, mode="reduce-overhead")
-                    print("[IndicParler] Model compilation successful!")
-            except Exception as compile_err:
-                print(f"[IndicParler] Model compilation skipped: {compile_err}")
+            # NOTE: torch.compile() disabled - compilation overhead (2+ minutes) is worse than benefit
+            # The first inference after compilation takes extremely long on CPU
+            # Other optimizations (inference_mode, larger chunks) provide sufficient speedup
+            # 
+            # # Try to compile model for faster CPU inference (PyTorch 2.0+)
+            # try:
+            #     import torch._dynamo
+            #     if hasattr(torch, 'compile') and self.device == "cpu":
+            #         print("[IndicParler] Compiling model for CPU optimization...")
+            #         self.model = torch.compile(self.model, mode="reduce-overhead")
+            #         print("[IndicParler] Model compilation successful!")
+            # except Exception as compile_err:
+            #     print(f"[IndicParler] Model compilation skipped: {compile_err}")
+            
             
             # Load tokenizers
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
